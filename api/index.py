@@ -19,9 +19,6 @@ class VercelMiddleware:
         elif environ.get("PATH_INFO", "").startswith("/api/index"):
             sub_path = environ["PATH_INFO"][len("/api/index"):]
             environ["PATH_INFO"] = sub_path if sub_path else "/"
-        elif environ.get("PATH_INFO", "").startswith("/api"):
-            sub_path = environ["PATH_INFO"][len("/api"):]
-            environ["PATH_INFO"] = sub_path if sub_path else "/"
         return self.wsgi_app(environ, start_response)
 
 
