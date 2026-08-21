@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+{% block title %}Academics | CampusERP Vision{% endblock %}
+{% block content %}
+<section class="page-intro">
+    <div>
+        <span class="eyebrow">Academics</span>
+        <h1>Record course outcomes and import marks at college scale.</h1>
+        <p>Admins can still enter one result manually, but large CSE or department-wise mark sheets can now be uploaded in one file and existing marks will update automatically.</p>
+    </div>
+</section>
+
+<section class="metric-grid compact-grid">
+    <article class="metric-card">
+        <span>Academic Average</span>
+        <strong>{{ metrics.average_score }}%</strong>
+        <p>Overall score across all entries</p>
+    </article>
+    <article class="metric-card">
+        <span>Students</span>
+        <strong>{{ metrics.total_students }}</strong>
+        <p>Profiles ready for result entry</p>
+    </article>
+    <article class="metric-card">
+        <span>Top Performers</span>
+        <strong>{{ top_performers|length }}</strong>
+        <p>Students currently on the leaderboard</p>
+    </article>
+    <article class="metric-card accent-card">
+        <span>Courses Tracked</span>
+        <strong>{{ course_performance|length }}</strong>
+        <p>Distinct course records in the gradebook</p>
+    </article>
+</section>
+
+<section class="two-column">
+    <article class="panel">
+        <div class="section-head">
+            <div>
+                <span class="eyebrow">Result Entry</span>
+                <h3>Add or update one course assessment</h3>
+            </div>
+        </div>
+        <form action="{{ url_for('add_result') }}" method="post" class="form-grid">
+            <label class="full-span">
+                Student
+                <select name="student_id" required>
+                    <option value="">Select student</option>
+                    {% for student in students %}
+                        <option value="{{ student['id'] }}">{{ student["full_name"] }} · {{ student["enrollment_no"] }} · {{ student["program_name"] }} · {{ student["semester"] }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <label>
+                Assessment name
+                <input type="text" name="assessment_name" placeholder="Mid Semester Test" required>
+            </label>
+            <label>
+                Course code
+                <input type="text" name="course_code" placeholder="CS402" required>
+            </label>
+            <label class="full-span">
+                Course title
+                <input type="text" name="course_title" placeholder="Operating Systems" required>
+            </label>
+            <label>
+                Score
+                <input type="number" step="0.01" name="score" required>
+            </label>
+            <label>
+                Max score
+                <input type="number" step="0.01" name="max_score" required>
+            </label>
+            <button class="button button-primary" type="submit">Save Result</button>
+        </form>
+    </article>
+
+    <article class="panel">
+        <div class="section-head">
+            <div>
+                <span class="eyebrow">Bulk Import</span>
+                <h3>Upload Excel or CSV mark sheets</h3>
+            </div>
+        </div>
+        <form action="{{ url_for('bulk_upload_results') }}" method="post" enctype="multipart/form-data" class="import-grid">
+            <label>
+                Marks file
+                <input type="file" name="results_file" accept=".xlsx,.csv" required>
+            </label>
+            <p class="form-note">Accepted formats: <code>.xlsx</code> and <code>.csv</code>. Existing marks are updated automatically using <code>student + assessment + course code</code>.</p>
+            <div class="result-card muted">
+                Required columns:
+                <ul class="note-list">
+                    <li><code>enrollment_no</code></li>
+                    <li><code>assessment_name</code></li>
+                    <li><code>course_code</code></li>
+                    <li><code>course_title</code></li>
+                    <li><code>score</code></li>
+                    <li><code>max_score</code></li>
+                </ul>
+            </div>
+            <button class="button button-primary" type="submit">Import Marks</button>
+        </form>
+    </article>
+</section>
+
+<section class="panel">
+    <div class="section-head">
+        <div>
+            <span class="eyebrow">Course Analytics</span>
+            <h3>Performance by course</h3>
+        </div>
+    </div>
+    <div class="class-grid side-grid">
+        {% for course in course_performance %}
+            <article class="class-card mini-card">
+                <strong>{{ course["course_code"] }}</strong>
+                <p>{{ course["course_title"] }}</p>
+                <small>{{ course["average_percent"] }}% average · {{ course["submissions"] }} submissions</small>
+            </article>
+        {% else %}
+            <div class="empty-state">No course analytics yet. Add results or upload a mark sheet to populate this view.</div>
+        {% endfor %}
+    </div>
+</section>
+
+<section class="dashboard-grid">
+    <article class="panel panel-span-2">
+        <div class="section-head">
+            <div>
+                <span class="eyebrow">Recent Results</span>
+                <h3>Latest assessment entries</h3>
+            </div>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Enrollment</th>
+                        <th>Assessment</th>
+                        <th>Course</th>
+                        <th>Score</th>
+                        <th>Grade</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in recent_results %}
+                        <tr>
+                            <td>{{ row["full_name"] }}</td>
+                            <td>{{ row["enrollment_no"] }}</td>
+                            <td>{{ row["assessment_name"] }}</td>
+                            <td>{{ row["course_code"] }} · {{ row["course_title"] }}</td>
+                            <td>{{ row["score"] }}/{{ row["max_score"] }}</td>
+                            <td>{{ row["grade"] }}</td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="6">No course records yet.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </article>
+
+    <article class="panel">
+        <div class="section-head">
+            <div>
+                <span class="eyebrow">Leaderboard</span>
+                <h3>Top students</h3>
+            </div>
+        </div>
+        <div class="stack-list compact-list">
+            {% for student in top_performers %}
+                <article class="stack-item compact-item">
+                    <div>
+                        <strong>{{ student["full_name"] }}</strong>
+                        <p>{{ student["program_name"] }} · {{ student["semester"] }}</p>
+                    </div>
+                    <span class="score-pill">{{ student["average_percent"] }}%</span>
+                </article>
+            {% else %}
+                <div class="empty-state">No leaderboard data yet.</div>
+            {% endfor %}
+        </div>
+    </article>
+</section>
+{% endblock %}

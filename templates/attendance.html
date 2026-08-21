@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+{% block title %}Attendance | CampusERP Vision{% endblock %}
+{% block content %}
+<section class="page-intro">
+    <div>
+        <span class="eyebrow">AI Attendance Module</span>
+        <h1>Mark college attendance with live facial recognition.</h1>
+        <p>Use any webcam-connected browser station to identify students and sync daily attendance directly into the ERP.</p>
+    </div>
+</section>
+
+<section class="metric-grid compact-grid">
+    <article class="metric-card">
+        <span>Total Students</span>
+        <strong>{{ metrics.total_students }}</strong>
+        <p>Profiles ready for recognition</p>
+    </article>
+    <article class="metric-card">
+        <span>Present Today</span>
+        <strong>{{ metrics.present_today }}</strong>
+        <p>Live face captures recorded</p>
+    </article>
+    <article class="metric-card">
+        <span>Pending Today</span>
+        <strong>{{ metrics.pending_today }}</strong>
+        <p>Students still awaiting recognition</p>
+    </article>
+    <article class="metric-card accent-card">
+        <span>Attendance Rate</span>
+        <strong>{{ metrics.attendance_rate }}%</strong>
+        <p>Based on recognized students</p>
+    </article>
+</section>
+
+<section class="two-column">
+    <article class="panel">
+        <div class="section-head">
+            <div>
+                <span class="eyebrow">Live Camera</span>
+                <h3>Capture attendance</h3>
+            </div>
+        </div>
+        <div class="camera-wrap">
+            <video id="attendance-camera" autoplay playsinline></video>
+            <canvas id="attendance-snapshot" hidden></canvas>
+        </div>
+        <div class="camera-actions">
+            <button class="button button-secondary" type="button" id="start-attendance-camera">Start Camera</button>
+            <button class="button button-primary" type="button" id="capture-attendance">Recognize Student</button>
+        </div>
+        <div id="attendance-result" class="result-card muted">Start the camera and align one student face in the frame.</div>
+    </article>
+
+    <article class="panel">
+        <div class="section-head">
+            <div>
+                <span class="eyebrow">Pending Verification</span>
+                <h3>Students not yet marked today</h3>
+            </div>
+        </div>
+        <div class="stack-list compact-list">
+            {% for student in pending_students %}
+                <article class="stack-item compact-item">
+                    <div>
+                        <strong>{{ student["full_name"] }}</strong>
+                        <p>{{ student["enrollment_no"] }} · {{ student["program_name"] }} · {{ student["semester"] }}</p>
+                    </div>
+                    <span class="badge badge-warning">Pending</span>
+                </article>
+            {% else %}
+                <div class="empty-state">Everyone currently enrolled has been marked or there are no students yet.</div>
+            {% endfor %}
+        </div>
+    </article>
+</section>
+
+<section class="dashboard-grid attendance-board">
+    <article class="panel panel-span-2">
+        <div class="section-head">
+            <div>
+                <span class="eyebrow">Daily Feed</span>
+                <h3>Today&apos;s recognition log</h3>
+            </div>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Enrollment</th>
+                        <th>Department</th>
+                        <th>Program</th>
+                        <th>Semester</th>
+                        <th>Confidence</th>
+                        <th>Logged At</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in recent_attendance %}
+                        <tr>
+                            <td>{{ row["full_name"] }}</td>
+                            <td>{{ row["enrollment_no"] }}</td>
+                            <td>{{ row["department"] }}</td>
+                            <td>{{ row["program_name"] }}</td>
+                            <td>{{ row["semester"] }}</td>
+                            <td>{{ row["confidence"] }}%</td>
+                            <td>{{ row["logged_at"] }}</td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="7">No attendance logs yet.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </article>
+
+    <article class="panel">
+        <div class="section-head">
+            <div>
+                <span class="eyebrow">Cohort Status</span>
+                <h3>Department readiness</h3>
+            </div>
+        </div>
+        <div class="stack-list">
+            {% for row in cohort_breakdown %}
+                <article class="stack-item">
+                    <strong>{{ row["department"] }}</strong>
+                    <p>{{ row["program_name"] }} · {{ row["semester"] }}</p>
+                    <small>{{ row["present_today"] }} of {{ row["total_students"] }} marked present</small>
+                </article>
+            {% else %}
+                <div class="empty-state">Register students to see cohort readiness.</div>
+            {% endfor %}
+        </div>
+    </article>
+</section>
+{% endblock %}

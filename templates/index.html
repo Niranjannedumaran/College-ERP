@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% block title %}VisionAttend | Smart Attendance{% endblock %}
+{% block content %}
+<section class="hero">
+    <div class="hero-copy">
+        <span class="eyebrow">Product-ready workforce intelligence</span>
+        <h1>Automate attendance with fast, camera-based facial recognition.</h1>
+        <p>VisionAttend replaces manual registers, card punching, and buddy punching with a secure browser-based attendance workflow built in Python.</p>
+        <div class="hero-actions">
+            <a class="button button-primary" href="{{ url_for('attendance') }}">Start Attendance</a>
+            <a class="button button-secondary" href="{{ url_for('employees') }}">Enroll Employees</a>
+        </div>
+        <div class="hero-stats">
+            <article>
+                <strong>{{ metrics.total_employees }}</strong>
+                <span>Enrolled employees</span>
+            </article>
+            <article>
+                <strong>{{ metrics.total_checkins_today }}</strong>
+                <span>Check-ins today</span>
+            </article>
+            <article>
+                <strong>{{ metrics.active_departments }}</strong>
+                <span>Active departments</span>
+            </article>
+        </div>
+    </div>
+    <div class="hero-card">
+        <h2>Live Ops Snapshot</h2>
+        {% if metrics.last_event %}
+            <div class="event-card">
+                <span class="status-pill">Latest Detection</span>
+                <strong>{{ metrics.last_event["full_name"] }}</strong>
+                <p>{{ metrics.last_event["department"] }} · {{ metrics.last_event["status"] }}</p>
+                <small>{{ metrics.last_event["logged_at"] }} · {{ metrics.last_event["confidence"] }}% confidence</small>
+            </div>
+        {% else %}
+            <div class="event-card muted">
+                <strong>No attendance activity yet</strong>
+                <p>Enroll employees and capture the first attendance record.</p>
+            </div>
+        {% endif %}
+        <ul class="feature-list">
+            <li>Real-time recognition</li>
+            <li>Photo-based onboarding</li>
+            <li>Clean audit trail</li>
+        </ul>
+    </div>
+</section>
+
+<section class="section-grid">
+    <article class="panel">
+        <span class="eyebrow">How it works</span>
+        <h3>Simple workflow for schools, offices, and factories</h3>
+        <p>Register each employee once, use any standard webcam, and record attendance instantly from the browser.</p>
+    </article>
+    <article class="panel accent">
+        <span class="eyebrow">Built for deployment</span>
+        <h3>Python backend with production-friendly separation</h3>
+        <p>Flask routing, SQLite persistence, OpenCV image handling, and clear templates make this a strong launch point for a hosted product.</p>
+    </article>
+</section>
+
+<section class="panel">
+    <div class="section-head">
+        <div>
+            <span class="eyebrow">Recent activity</span>
+            <h3>Latest attendance records</h3>
+        </div>
+        <a class="text-link" href="{{ url_for('dashboard') }}">Open dashboard</a>
+    </div>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Code</th>
+                    <th>Department</th>
+                    <th>Status</th>
+                    <th>Confidence</th>
+                    <th>Logged At</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in recent_logs %}
+                    <tr>
+                        <td>{{ log["full_name"] }}</td>
+                        <td>{{ log["employee_code"] }}</td>
+                        <td>{{ log["department"] }}</td>
+                        <td>{{ log["status"] }}</td>
+                        <td>{{ log["confidence"] }}%</td>
+                        <td>{{ log["logged_at"] }}</td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="6">No attendance logs available.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

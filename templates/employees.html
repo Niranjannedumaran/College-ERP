@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}Employees | VisionAttend{% endblock %}
+{% block content %}
+<section class="page-header">
+    <div>
+        <span class="eyebrow">Enrollment</span>
+        <h1>Employee onboarding</h1>
+    </div>
+</section>
+
+<section class="two-column">
+    <article class="panel">
+        <span class="eyebrow">Add employee</span>
+        <h3>Register a face profile</h3>
+        <form action="{{ url_for('create_employee') }}" method="post" enctype="multipart/form-data" class="form-grid">
+            <label>
+                Full name
+                <input type="text" name="full_name" required>
+            </label>
+            <label>
+                Employee code
+                <input type="text" name="employee_code" required>
+            </label>
+            <label>
+                Department
+                <input type="text" name="department" required>
+            </label>
+            <label>
+                Email
+                <input type="email" name="email" required>
+            </label>
+            <label class="full-span">
+                Photo upload
+                <input type="file" name="photo" accept="image/*">
+            </label>
+            <input type="hidden" name="captured_photo" id="captured-photo">
+            <div class="full-span enrollment-capture">
+                <div class="camera-wrap compact">
+                    <video id="enroll-camera" autoplay playsinline></video>
+                    <canvas id="enroll-snapshot" hidden></canvas>
+                </div>
+                <div class="camera-actions">
+                    <button class="button button-secondary" type="button" id="start-enroll-camera">Start Camera</button>
+                    <button class="button button-secondary" type="button" id="capture-enroll-photo">Use Live Face Capture</button>
+                </div>
+                <div id="enroll-result" class="result-card muted">Upload a photo or capture a live face image for this member.</div>
+            </div>
+            <button class="button button-primary" type="submit">Enroll Employee</button>
+        </form>
+    </article>
+
+    <article class="panel">
+        <span class="eyebrow">Enrollment notes</span>
+        <h3>Capture standards</h3>
+        <ul class="feature-list">
+            <li>Use one clear front-facing face per member</li>
+            <li>Avoid sunglasses, masks, or low light</li>
+            <li>You can upload an image or use the live camera capture above</li>
+            <li>Use unique employee codes for payroll alignment</li>
+        </ul>
+    </article>
+</section>
+
+<section class="panel">
+    <div class="section-head">
+        <div>
+            <span class="eyebrow">Registry</span>
+            <h3>Enrolled employees</h3>
+        </div>
+    </div>
+    <div class="employee-grid">
+        {% for employee in employees %}
+            <article class="employee-card">
+                <img src="{{ url_for('static', filename=employee['image_path']) }}" alt="{{ employee['full_name'] }}">
+                <div>
+                    <strong>{{ employee["full_name"] }}</strong>
+                    <p>{{ employee["employee_code"] }} · {{ employee["department"] }}</p>
+                    <small>{{ employee["email"] }}</small>
+                </div>
+            </article>
+        {% else %}
+            <p>No employees enrolled yet.</p>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

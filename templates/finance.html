@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+{% block title %}Finance | CampusERP Vision{% endblock %}
+{% block content %}
+<section class="page-intro">
+    <div>
+        <span class="eyebrow">Finance</span>
+        <h1>Manage the college fee ledger inside the ERP.</h1>
+        <p>Track semester billing, collected amounts, outstanding balances, and overdue accounts against the same student records used by attendance and academics.</p>
+    </div>
+</section>
+
+<section class="metric-grid compact-grid">
+    <article class="metric-card">
+        <span>Total Due</span>
+        <strong>Rs {{ summary.total_due }}</strong>
+        <p>Total billed amount</p>
+    </article>
+    <article class="metric-card">
+        <span>Total Paid</span>
+        <strong>Rs {{ summary.total_paid }}</strong>
+        <p>Recovered so far</p>
+    </article>
+    <article class="metric-card">
+        <span>Outstanding</span>
+        <strong>Rs {{ summary.outstanding }}</strong>
+        <p>Pending fee balance</p>
+    </article>
+    <article class="metric-card accent-card">
+        <span>Recovery Rate</span>
+        <strong>{{ summary.recovery_rate }}%</strong>
+        <p>{{ summary.overdue_count }} overdue accounts</p>
+    </article>
+</section>
+
+<section class="two-column">
+    <article class="panel">
+        <div class="section-head">
+            <div>
+                <span class="eyebrow">Fee Entry</span>
+                <h3>Update semester ledger</h3>
+            </div>
+        </div>
+        <form action="{{ url_for('add_fee_record') }}" method="post" class="form-grid">
+            <label class="full-span">
+                Student
+                <select name="student_id" required>
+                    <option value="">Select student</option>
+                    {% for student in students %}
+                        <option value="{{ student['id'] }}">{{ student["full_name"] }} · {{ student["enrollment_no"] }} · {{ student["program_name"] }} · {{ student["semester"] }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <label>
+                Fee head
+                <input type="text" name="fee_head" placeholder="Semester Tuition" required>
+            </label>
+            <label>
+                Semester label
+                <input type="text" name="semester_label" placeholder="Semester 4 2026" required>
+            </label>
+            <label>
+                Due date
+                <input type="date" name="due_date" required>
+            </label>
+            <label>
+                Amount due
+                <input type="number" step="0.01" name="amount_due" required>
+            </label>
+            <label>
+                Amount paid
+                <input type="number" step="0.01" name="amount_paid" required>
+            </label>
+            <button class="button button-primary" type="submit">Save Fee Record</button>
+        </form>
+    </article>
+
+    <article class="panel">
+        <div class="section-head">
+            <div>
+                <span class="eyebrow">Overdue Tracker</span>
+                <h3>Priority follow-up accounts</h3>
+            </div>
+        </div>
+        <div class="stack-list">
+            {% for row in overdue_fees %}
+                <article class="stack-item">
+                    <strong>{{ row["full_name"] }}</strong>
+                    <p>{{ row["enrollment_no"] }} · {{ row["fee_head"] }}</p>
+                    <small>{{ row["program_name"] }} · {{ row["semester"] }} · {{ row["semester_label"] }} · Due {{ row["due_date"] }} · Rs {{ row["balance_due"] }} pending</small>
+                </article>
+            {% else %}
+                <div class="empty-state">No overdue accounts right now.</div>
+            {% endfor %}
+        </div>
+    </article>
+</section>
+
+<section class="panel">
+    <div class="section-head">
+        <div>
+            <span class="eyebrow">Fee Ledger</span>
+            <h3>Recent finance entries</h3>
+        </div>
+    </div>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Student</th>
+                    <th>Enrollment</th>
+                    <th>Fee Head</th>
+                    <th>Semester</th>
+                    <th>Due</th>
+                    <th>Paid</th>
+                    <th>Balance</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in fee_records %}
+                    <tr>
+                        <td>{{ row["full_name"] }}</td>
+                        <td>{{ row["enrollment_no"] }}</td>
+                        <td>{{ row["fee_head"] }}</td>
+                        <td>{{ row["semester_label"] }}</td>
+                        <td>Rs {{ row["amount_due"] }}</td>
+                        <td>Rs {{ row["amount_paid"] }}</td>
+                        <td>Rs {{ row["balance_due"] }}</td>
+                        <td>{{ row["status"] }}</td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="8">No fee ledger entries yet.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

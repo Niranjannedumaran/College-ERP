@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+{% block title %}Students | CampusERP Vision{% endblock %}
+{% block content %}
+<section class="page-intro">
+    <div>
+        <span class="eyebrow">Admissions and Profiles</span>
+        <h1>Register college students, manage portal access, and keep facial profiles ready.</h1>
+        <p>The student master now supports direct portal password resets from the admin side so student access does not block attendance, academics, or finance workflows.</p>
+    </div>
+</section>
+
+<section class="metric-grid compact-grid">
+    <article class="metric-card">
+        <span>Students</span>
+        <strong>{{ metrics.total_students }}</strong>
+        <p>Profiles created in the ERP</p>
+    </article>
+    <article class="metric-card">
+        <span>Departments</span>
+        <strong>{{ metrics.active_departments }}</strong>
+        <p>Active academic units</p>
+    </article>
+    <article class="metric-card">
+        <span>Programs</span>
+        <strong>{{ metrics.active_programs }}</strong>
+        <p>Registered degree tracks</p>
+    </article>
+    <article class="metric-card accent-card">
+        <span>Outstanding Fees</span>
+        <strong>Rs {{ metrics.outstanding }}</strong>
+        <p>Visible on each student card below</p>
+    </article>
+</section>
+
+<section class="two-column">
+    <article class="panel">
+        <div class="section-head">
+            <div>
+                <span class="eyebrow">Add Student</span>
+                <h3>Create college profile</h3>
+            </div>
+        </div>
+        <form action="{{ url_for('create_student') }}" method="post" enctype="multipart/form-data" class="form-grid">
+            <label>
+                Enrollment number
+                <input type="text" name="enrollment_no" placeholder="CSE240015" required>
+            </label>
+            <label>
+                Full name
+                <input type="text" name="full_name" required>
+            </label>
+            <label>
+                Department
+                <input type="text" name="department" placeholder="Computer Science" required>
+            </label>
+            <label>
+                Program
+                <input type="text" name="program_name" placeholder="B.Tech CSE" required>
+            </label>
+            <label>
+                Semester
+                <input type="text" name="semester" placeholder="Semester 4" required>
+            </label>
+            <label>
+                Batch year
+                <input type="text" name="batch_year" placeholder="2024" required>
+            </label>
+            <label>
+                Emergency contact name
+                <input type="text" name="emergency_contact_name" required>
+            </label>
+            <label>
+                Emergency contact phone
+                <input type="text" name="emergency_contact_phone" required>
+            </label>
+            <label>
+                Portal password
+                <input type="password" name="portal_password" required>
+            </label>
+            <label>
+                Email
+                <input type="email" name="email" placeholder="student@college.edu">
+            </label>
+            <label>
+                Date of birth
+                <input type="date" name="dob">
+            </label>
+            <label class="full-span">
+                Address
+                <textarea name="address" rows="3"></textarea>
+            </label>
+            <label class="full-span">
+                Upload face photo
+                <input type="file" name="photo" accept="image/*">
+            </label>
+            <input type="hidden" name="captured_photo" id="captured-photo">
+            <div class="full-span enrollment-capture">
+                <div class="camera-wrap compact">
+                    <video id="enroll-camera" autoplay playsinline></video>
+                    <canvas id="enroll-snapshot" hidden></canvas>
+                </div>
+                <div class="camera-actions">
+                    <button class="button button-secondary" type="button" id="start-enroll-camera">Start Camera</button>
+                    <button class="button button-secondary" type="button" id="capture-enroll-photo">Use Live Face Capture</button>
+                </div>
+                <div id="enroll-result" class="result-card muted">Upload a clear face image or capture one from the camera for this student identity profile.</div>
+            </div>
+            <p class="form-note full-span">Student login uses the enrollment number as the login ID. Admin can reset the portal password from the roster below at any time.</p>
+            <button class="button button-primary" type="submit">Register Student</button>
+        </form>
+    </article>
+
+    <article class="panel">
+        <div class="section-head">
+            <div>
+                <span class="eyebrow">Registration Notes</span>
+                <h3>What gets connected</h3>
+            </div>
+        </div>
+        <div class="stack-list">
+            <article class="stack-item">
+                <strong>Admin ERP</strong>
+                <p>Operations teams manage attendance, academics, finance, admissions, and bulk mark imports from one control panel.</p>
+            </article>
+            <article class="stack-item">
+                <strong>Student portal</strong>
+                <p>Every student gets a separate login to view only their attendance, results, fees, notices, and lecture schedule.</p>
+            </article>
+            <article class="stack-item">
+                <strong>Access recovery</strong>
+                <p>If a student cannot sign in, reset the portal password directly from the student card instead of editing the database manually.</p>
+            </article>
+        </div>
+        <div class="class-grid side-grid">
+            {% for row in cohort_breakdown %}
+                <article class="class-card mini-card">
+                    <strong>{{ row["department"] }}</strong>
+                    <p>{{ row["program_name"] }} · {{ row["semester"] }}</p>
+                    <small>{{ row["total_students"] }} enrolled</small>
+                </article>
+            {% else %}
+                <div class="empty-state">College cohorts will appear here once students are added.</div>
+            {% endfor %}
+        </div>
+    </article>
+</section>
+
+<section class="panel">
+    <div class="section-head">
+        <div>
+            <span class="eyebrow">Student Registry</span>
+            <h3>Current college roster</h3>
+        </div>
+    </div>
+    <div class="student-grid">
+        {% for student in students %}
+            <article class="student-card">
+                <img src="{{ url_for('static', filename=student['image_path']) }}" alt="{{ student['full_name'] }}">
+                <div class="student-content">
+                    <div class="student-head">
+                        <div>
+                            <strong>{{ student["full_name"] }}</strong>
+                            <p>{{ student["enrollment_no"] }} · {{ student["program_name"] }} · {{ student["semester"] }}</p>
+                        </div>
+                        <span class="badge {% if student['balance_due'] > 0 %}badge-warning{% else %}badge-success{% endif %}">{% if student['balance_due'] > 0 %}Fees Pending{% else %}Clear{% endif %}</span>
+                    </div>
+                    <div class="student-meta">
+                        <span>Department: {{ student["department"] }}</span>
+                        <span>Batch: {{ student["batch_year"] }}</span>
+                        <span>Login ID: {{ student["enrollment_no"] }}</span>
+                        <span>Status: {{ student["status"] }}</span>
+                    </div>
+                    <div class="summary-grid student-kpis">
+                        <div>
+                            <span>Academic Avg</span>
+                            <strong>{{ student["academic_average"] }}%</strong>
+                        </div>
+                        <div>
+                            <span>Outstanding</span>
+                            <strong>Rs {{ student["balance_due"] }}</strong>
+                        </div>
+                    </div>
+                    <form action="{{ url_for('reset_student_password') }}" method="post" class="inline-form">
+                        <input type="hidden" name="student_id" value="{{ student['id'] }}">
+                        <input type="password" name="new_password" placeholder="Reset portal password" minlength="6" required>
+                        <button class="button button-secondary small-button" type="submit">Reset Access</button>
+                    </form>
+                </div>
+            </article>
+        {% else %}
+            <div class="empty-state">No students registered yet. Use the form above to start the college ERP.</div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

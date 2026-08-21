@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}CampusERP Vision{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Fraunces:opsz,wght@9..144,600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header class="site-header">
+        <a class="brand" href="{% if current_user_role == 'admin' %}{{ url_for('dashboard') }}{% elif current_user_role == 'student' %}{{ url_for('student_panel') }}{% else %}{{ url_for('login') }}{% endif %}">
+            <span class="brand-mark">CV</span>
+            <div>
+                <strong>CampusERP Vision</strong>
+                <span>College ERP with facial attendance</span>
+            </div>
+        </a>
+        <nav class="site-nav">
+            {% if current_user_role == 'admin' %}
+                <a class="{% if request.path == '/dashboard' %}active{% endif %}" href="{{ url_for('dashboard') }}">Dashboard</a>
+                <a class="{% if request.path.startswith('/students') or request.path.startswith('/employees') %}active{% endif %}" href="{{ url_for('students') }}">Students</a>
+                <a class="{% if request.path.startswith('/attendance') %}active{% endif %}" href="{{ url_for('attendance') }}">Attendance</a>
+                <a class="{% if request.path.startswith('/academics') %}active{% endif %}" href="{{ url_for('academics') }}">Academics</a>
+                <a class="{% if request.path.startswith('/finance') %}active{% endif %}" href="{{ url_for('finance') }}">Finance</a>
+            {% elif current_user_role == 'student' %}
+                <a class="{% if request.path.startswith('/student') %}active{% endif %}" href="{{ url_for('student_panel') }}">My Panel</a>
+            {% else %}
+                <a class="active" href="{{ url_for('login') }}">Login</a>
+            {% endif %}
+        </nav>
+        <div class="header-actions">
+            {% if current_user_role %}
+                <div class="user-chip">
+                    <strong>{{ current_user_name }}</strong>
+                    <span>{{ current_user_role|title }}</span>
+                </div>
+                <a class="button button-secondary small-button" href="{{ url_for('logout') }}">Logout</a>
+            {% else %}
+                <span class="badge">Guest</span>
+            {% endif %}
+        </div>
+    </header>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <section class="flash-stack">
+                {% for category, message in messages %}
+                    <div class="flash flash-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            </section>
+        {% endif %}
+    {% endwith %}
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+.venv/
+__pycache__/
+*.pyc
+data/college_erp.db
+static/uploads/*
+!static/uploads/.gitkeep
+server.err.log
+server.out.log
+.vercel

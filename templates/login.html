@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Login | CampusERP Vision{% endblock %}
+{% block content %}
+<section class="auth-grid">
+    <article class="panel auth-card">
+        <span class="eyebrow">Role-Based Access</span>
+        <h1>Choose the correct college interface for admin or student login.</h1>
+        <p>Admins get the full ERP for departments, admissions, academics, attendance, and finance. Students get a separate personal portal with only their own records.</p>
+        <div class="stack-list">
+            <article class="stack-item">
+                <strong>Admin console</strong>
+                <p>Manage student onboarding, facial attendance, course results, semester fees, and campus reporting.</p>
+            </article>
+            <article class="stack-item">
+                <strong>Student portal</strong>
+                <p>See personal attendance history, course results, fee ledger, notices, and the lecture schedule for the current semester.</p>
+            </article>
+            <article class="stack-item">
+                <strong>Login IDs</strong>
+                <p>Admin uses a username. Students use enrollment number plus the portal password created during registration.</p>
+            </article>
+        </div>
+    </article>
+
+    <article class="panel auth-card">
+        <span class="eyebrow">Sign In</span>
+        <h3>Access your interface</h3>
+        <form action="{{ url_for('login') }}" method="post" class="form-grid auth-form">
+            <label class="full-span">
+                Sign in as
+                <select name="role" required>
+                    <option value="admin">Admin</option>
+                    <option value="student">Student</option>
+                </select>
+            </label>
+            <label class="full-span">
+                Username or enrollment number
+                <input type="text" name="username" required>
+            </label>
+            <label class="full-span">
+                Password
+                <input type="password" name="password" required>
+            </label>
+            <button class="button button-primary" type="submit">Login</button>
+        </form>
+        <p class="form-note">Default local admin login: <code>admin</code> / <code>admin123</code></p>
+    </article>
+</section>
+{% endblock %}

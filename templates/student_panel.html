@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+{% block title %}My Panel | CampusERP Vision{% endblock %}
+{% block content %}
+<section class="page-intro">
+    <div>
+        <span class="eyebrow">Student Portal</span>
+        <h1>Welcome, {{ student["full_name"] }}</h1>
+        <p>{{ student["enrollment_no"] }} · {{ student["department"] }} · {{ student["program_name"] }} · {{ student["semester"] }}</p>
+    </div>
+    <div class="hero-actions">
+        <span class="badge">Student Login</span>
+        <span class="badge {% if metrics.present_today %}badge-success{% else %}badge-warning{% endif %}">{% if metrics.present_today %}Present Today{% else %}Not Marked Today{% endif %}</span>
+    </div>
+</section>
+
+<section class="metric-grid compact-grid">
+    <article class="metric-card">
+        <span>Attendance Marks</span>
+        <strong>{{ metrics.attendance_marked }}</strong>
+        <p>Total recognized attendance entries</p>
+    </article>
+    <article class="metric-card">
+        <span>Academic Average</span>
+        <strong>{{ metrics.academic_average }}%</strong>
+        <p>Across available results</p>
+    </article>
+    <article class="metric-card">
+        <span>Outstanding Fees</span>
+        <strong>Rs {{ metrics.outstanding }}</strong>
+        <p>Paid Rs {{ metrics.total_paid }} out of Rs {{ metrics.total_due }}</p>
+    </article>
+    <article class="metric-card accent-card">
+        <span>Last Attendance</span>
+        <strong>{% if metrics.present_today %}Present{% else %}Pending{% endif %}</strong>
+        <p>{{ metrics.last_seen }}</p>
+    </article>
+</section>
+
+<section class="dashboard-grid">
+    <article class="panel">
+        <div class="section-head">
+            <div>
+                <span class="eyebrow">Profile</span>
+                <h3>Student information</h3>
+            </div>
+        </div>
+        <article class="student-card student-card-single">
+            <img src="{{ url_for('static', filename=student['image_path']) }}" alt="{{ student['full_name'] }}">
+            <div class="student-content">
+                <div class="student-meta">
+                    <span>Enrollment: {{ student["enrollment_no"] }}</span>
+                    <span>Department: {{ student["department"] }}</span>
+                    <span>Program: {{ student["program_name"] }}</span>
+                    <span>Semester: {{ student["semester"] }}</span>
+                    <span>Batch: {{ student["batch_year"] }}</span>
+                    <span>Emergency: {{ student["emergency_contact_name"] }} · {{ student["emergency_contact_phone"] }}</span>
+                    <span>Email: {{ student["email"] or 'Not provided' }}</span>
+                </div>
+                <p>{{ student["address"] or 'Address not available in the profile yet.' }}</p>
+            </div>
+        </article>
+    </article>
+
+    <article class="panel">
+        <div class="section-head">
+            <div>
+                <span class="eyebrow">Today</span>
+                <h3>Lecture schedule</h3>
+            </div>
+        </div>
+        <div class="stack-list">
+            {% for row in schedule %}
+                <article class="stack-item">
+                    <strong>{{ row["course_code"] }} · {{ row["course_title"] }}</strong>
+                    <p>{{ row["faculty_name"] }} · Room {{ row["room_no"] }}</p>
+                    <small>{{ row["weekday"] }} · {{ row["start_time"] }} to {{ row["end_time"] }}</small>
+                </article>
+            {% else %}
+                <div class="empty-state">No lecture schedule is available for your cohort today.</div>
+            {% endfor %}
+        </div>
+    </article>
+
+    <article class="panel panel-span-2">
+        <div class="section-head">
+            <div>
+                <span class="eyebrow">Attendance</span>
+                <h3>Your recent attendance history</h3>
+            </div>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Confidence</th>
+                        <th>Logged At</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in attendance_history %}
+                        <tr>
+                            <td>{{ row["attendance_date"] }}</td>
+                            <td>{{ row["status"] }}</td>
+                            <td>{{ row["confidence"] }}%</td>
+                            <td>{{ row["logged_at"] }}</td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="4">No attendance history recorded yet.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </article>
+
+    <article class="panel panel-span-2">
+        <div class="section-head">
+            <div>
+                <span class="eyebrow">Academics</span>
+                <h3>Your latest results</h3>
+            </div>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Assessment</th>
+                        <th>Course</th>
+                        <th>Score</th>
+                        <th>Grade</th>
+                        <th>Updated</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in results %}
+                        <tr>
+                            <td>{{ row["assessment_name"] }}</td>
+                            <td>{{ row["course_code"] }} · {{ row["course_title"] }}</td>
+                            <td>{{ row["score"] }}/{{ row["max_score"] }}</td>
+                            <td>{{ row["grade"] }}</td>
+                            <td>{{ row["updated_at"] }}</td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="5">No academic records yet.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </article>
+
+    <article class="panel">
+        <div class="section-head">
+            <div>
+                <span class="eyebrow">Finance</span>
+                <h3>Your fee ledger</h3>
+            </div>
+        </div>
+        <div class="stack-list">
+            {% for row in fees %}
+                <article class="stack-item">
+                    <strong>{{ row["fee_head"] }}</strong>
+                    <p>{{ row["semester_label"] }} · Due Rs {{ row["amount_due"] }} · Paid Rs {{ row["amount_paid"] }}</p>
+                    <small>Balance Rs {{ row["balance_due"] }} · {{ row["status"] }} · Due {{ row["due_date"] }}</small>
+                </article>
+            {% else %}
+                <div class="empty-state">No fee records have been posted yet.</div>
+            {% endfor %}
+        </div>
+    </article>
+
+    <article class="panel">
+        <div class="section-head">
+            <div>
+                <span class="eyebrow">Notices</span>
+                <h3>Campus updates</h3>
+            </div>
+        </div>
+        <div class="stack-list">
+            {% for notice in notices %}
+                <article class="stack-item">
+                    <strong>{{ notice["title"] }}</strong>
+                    <p>{{ notice["body"] }}</p>
+                    <small>{{ notice["audience"] }}</small>
+                </article>
+            {% else %}
+                <div class="empty-state">No notices available.</div>
+            {% endfor %}
+        </div>
+    </article>
+</section>
+{% endblock %}
